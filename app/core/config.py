@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str
     POSTGRES_USER: str
     POSTGRES_PASSWORD: SecretStr
-    POSTGRES_ASYNC: Optional[bool] = False
+    POSTGRES_ASYNC: Optional[bool] = True
     POSTGRES_URI: Optional[PostgresDsn] = None
 
     @validator('POSTGRES_URI', pre=True)

@@ -7,9 +7,6 @@
 4. [Usage](#usage)
 5. [API Documentation](#api-documentation)
 6. [Configuration](#configuration)
-7. [Contributing](#contributing)
-8. [License](#license)
-9. [Contact](#contact)
 
 
 ## Project Overview
@@ -68,17 +65,12 @@ The project uses Alembic for handling database migrations.
     alembic init alembic
     ```
 
-2. Update the `alembic.ini` file to set your `SQLALCHEMY_DATABASE_URI`. Update the `sqlalchemy.url` line in `alembic.ini` to point to your PostgreSQL database. Example:
-    ```ini
-    sqlalchemy.url = postgresql://taskuser:yourpassword@localhost/taskdb
-    ```
-
-3. Generate migration scripts:
+2. Generate migration scripts:
     ```bash
-    alembic revision --autogenerate -m "Initial migration"
+    alembic revision -m "Initial migration"
     ```
 
-4. Apply the migrations:
+3. Apply the migrations:
     ```bash
     alembic upgrade head
     ```
@@ -87,7 +79,7 @@ The project uses Alembic for handling database migrations.
 
 - Create a new migration script:
     ```bash
-    alembic revision --autogenerate -m "Your migration message"
+    alembic revision -m "Your migration message"
     ```
 
 - Apply migrations:
