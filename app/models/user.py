@@ -2,6 +2,10 @@ from sqlalchemy import Column, String, Boolean, ForeignKey, UUID
 from sqlalchemy.orm import relationship
 import uuid
 from .base import BaseModel
+from passlib.context import CryptContext
+
+# Creating a CryptContext specifically for bcrypt
+bcrypt_context = CryptContext(schemes=["bcrypt"])
 
 class User(BaseModel):
     __tablename__ = 'users'
@@ -18,3 +22,9 @@ class User(BaseModel):
 
     tasks = relationship("Task", back_populates="user")
     company = relationship("Company", back_populates="users")
+
+def get_password_hash(password: str) -> str:
+    return bcrypt_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt_context.verify(plain_password, hashed_password)
