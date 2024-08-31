@@ -36,8 +36,8 @@ def upgrade() -> None:
         sa.Column("hashed_password", sa.String),
         sa.Column("is_active", sa.Boolean, default=DEFAULT_IS_ACTIVE),
         sa.Column("is_admin", sa.Boolean, default=DEFAULT_IS_ADMIN),
-        sa.Column("created_at", sa.DateTime),
-        sa.Column("updated_at", sa.DateTime)
+        sa.Column("created_at", sa.DateTime(timezone=True)),
+        sa.Column("updated_at", sa.DateTime(timezone=True))
     )
     # Data seed for first user
     op.bulk_insert(user_table, [

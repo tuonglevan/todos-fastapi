@@ -20,7 +20,6 @@ STATUS_ENUM = 'statusenum'
 PRIORITY_ENUM = 'priorityenum'
 TASKS_TABLE = 'tasks'
 
-
 def upgrade() -> None:
     op.create_table(
         TASKS_TABLE,

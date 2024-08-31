@@ -5,7 +5,7 @@ from sqlalchemy import pool, engine_from_config
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from alembic import context
-from app.core.config import get_config
+from app.core.config import get_database_url
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -16,12 +16,11 @@ def is_async_postgres_url(url: str) -> bool:
     return url.startswith("postgresql+asyncpg://")
 
 # Determine if we are in async mode based on the URL scheme
-database_url = get_config().POSTGRES_URI
-print("DATABASE URL: ", database_url)
-is_async_connection = is_async_postgres_url(database_url)
+DATABASE_URL_ASYNC = get_database_url(async_mode=True)
+print("DATABASE URL ASYNC: ", DATABASE_URL_ASYNC)
+is_async_connection = is_async_postgres_url(DATABASE_URL_ASYNC)
 # DB Connection configuration
-config.set_main_option('sqlalchemy.url', database_url)
-
+config.set_main_option('sqlalchemy.url', DATABASE_URL_ASYNC)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:

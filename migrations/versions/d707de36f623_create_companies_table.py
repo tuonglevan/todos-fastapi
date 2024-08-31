@@ -27,10 +27,9 @@ def upgrade() -> None:
         sa.Column("id", sa.UUID, nullable=False, primary_key=True),
         sa.Column("name", sa.String(length=255), nullable=False),
         sa.Column("description", sa.Text, nullable=True),
-        sa.Column("mode", sa.String(length=50), nullable=False),
-        sa.Column("rating", sa.Float, nullable=False),
-        sa.Column("created_at", sa.DateTime),
-        sa.Column("updated_at", sa.DateTime)
+        sa.Column("mode", sa.Boolean, default=True),
+        sa.Column("created_at", sa.DateTime(timezone=True)),
+        sa.Column("updated_at", sa.DateTime(timezone=True))
     )
     # Add company_id column to users table
     op.add_column(USERS_TABLE, sa.Column('company_id', sa.UUID, nullable=True))
@@ -45,8 +44,7 @@ def upgrade() -> None:
             "id": company_id,
             "name": "FastApi",
             "description": "FastApi is a framework for building fast APIs",
-            "mode": "remote",
-            "rating": 4.5,
+            "mode": True,
             "created_at": get_current_utc_datetime(),
             "updated_at": get_current_utc_datetime()
         }
