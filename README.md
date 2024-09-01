@@ -1,117 +1,114 @@
-# FastAPI Task Application
+# FastAPI with PostgreSQL using Docker Compose
 
-## Table of Contents
-1. [Project Overview](#project-overview)
-2. [Features](#features)
-3. [Installation](#installation)
-4. [Usage](#usage)
-5. [API Documentation](#api-documentation)
-6. [Configuration](#configuration)
+This project demonstrates how to set up a to-do list application using FastAPI with a PostgreSQL database, all managed through Docker Compose. The application includes the following features:
+
+- **Users**: Manage user accounts, authentication, and profiles.
+- **Companies**: Associate users with companies to manage tasks at a corporate level.
+- **Tasks**: Create, update, delete, and view tasks, with associations to users and companies.
+- **Auth Token**: Secure endpoints with token-based authentication using JWT (JSON Web Tokens).
+
+The setup also includes automatic database migration using Alembic to manage schema changes over time.
 
 
-## Project Overview
+## Prerequisites
 
-This project is a simple ToDo application built using FastAPI. It provides a web API to create, read, update, and delete (CRUD) tasks.
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
 
-## Features
+## Getting Started
 
-- Create a new Task item
-- Retrieve a list of Task items
-- Retrieve a single Task item
-- Update a Task item
-- Delete a Task item
+### 1. Clone the repository
 
-## Installation
+```bash
+git clone https://github.com/tuonglevan/todo-fastapi.git
+cd todo-fastapi
+```
 
-### Prerequisites
+### 2. Set up environment variables
 
-- Python 3.12.3
+Create a `.env` file in the root of the project and add the following contents:
 
-### Steps
+```env
+POSTGRES_DB=todos
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=1234567
+DEFAULT_PASSWORD_ADMIN=123456
+# JWT
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=60
+JWT_SECRET_KEY=2334dfdfdfdfdf2334453
+JWT_ALGORITHM=HS256
+```
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/tuonglevan/fastapi-todo.git
-    cd fastapi-todo
-    ```
-2. Create a virtual environment (optional but recommended):
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    ```
-3. Install the necessary packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
-4. Set up your PostgreSQL database and user. Example commands:
-    ```sql
-    CREATE DATABASE taskdb;
-    CREATE USER taskuser WITH PASSWORD 'yourpassword';
-    GRANT ALL PRIVILEGES ON DATABASE taskdb TO taskuser;
-    ```
+### 3. Build and run the application
 
-5. Update your environment variables or configuration file with your database URL: 
-   DATABASE_URL=postgresql://taskuser:yourpassword@localhost/taskdb 
-   
+Use Docker Compose to build and run the application:
 
-## Database Migrations
+```bash
+docker-compose up --build
+```
 
-The project uses Alembic for handling database migrations.
+This will:
 
-### Setting Up Alembic
+- Build the FastAPI application image.
+- Start the PostgreSQL database container.
+- Apply database migrations using Alembic.
+- Start the FastAPI application.
 
-1. Initialize Alembic in your project (if not already done):
-    ```bash
-    alembic init alembic
-    ```
+### 4. Access the application
 
-2. Generate migration scripts:
-    ```bash
-    alembic revision -m "Initial migration"
-    ```
+Once the containers are up and running, you can access the FastAPI application at:
 
-3. Apply the migrations:
-    ```bash
-    alembic upgrade head
-    ```
+### 5. Stopping the application
 
-### Running Migrations
+To stop the running containers, you can use:
 
-- Create a new migration script:
-    ```bash
-    alembic revision -m "Your migration message"
-    ```
+```bash
+docker-compose down
+```
 
-- Apply migrations:
-    ```bash
-    alembic upgrade head
-    ```
+This will stop and remove the containers defined in the Docker Compose file.
+## Useful Commands
 
-- Rollback the last migration:
-    ```bash
-    alembic downgrade -1
-    ```
+### Running Alembic Migrations Manually
 
-## Usage
+If you need to run the Alembic migrations manually (e.g., after modifying models):
 
-1. Run the FastAPI application:
-    ```bash
-    uvicorn main:app --reload
-    ```
-2. Open your browser and navigate to: http://127.0.0.1:8000
-3. You can also explore the automatically generated API documentation at: http://127.0.0.1:8000/docs
+```bash
+docker-compose run web alembic upgrade head
+```
 
-## API Documentation
+### Creating a new Alembic Migration
 
-The application follows RESTFUL principles. Below are the available endpoints:
+To create a new Alembic migration after updating your models:
 
-- **GET** `/tasks` - Retrieve a list of Task items
-- **GET** `/tasks/{task_id}` - Retrieve a single Task item
-- **POST** `/tasks` - Create a new Task item
-- **PUT** `/tasks/{task_id}` - Update an existing Task item
-- **DELETE** `/tasks/{task_id}` - Delete a Task item
+```bash
+docker-compose run web alembic revision  -m "your message"
+```
 
-## Configuration
+### Downgrading Alembic Migrations
 
-- `DATABASE_URL`: The URL of the database to connect to.
-- `SECRET_KEY`: A secret key for securing the application.
+If you need to downgrade migrations, you have a few options:
+
+#### Downgrade by One Revision
+
+To downgrade by one revision:
+
+```bash
+docker-compose run web alembic downgrade -1
+```
+
+#### Downgrade to a Specific Revision
+
+To downgrade to a specific revision, replace `revision_id` with the target revision ID:
+
+```bash
+docker-compose run web alembic downgrade <revision_id>
+```
+
+#### Downgrade to Base (Starting Point)
+
+To downgrade all the way back to the base (earliest) state:
+
+```bash
+docker-compose run web alembic downgrade base
+```
