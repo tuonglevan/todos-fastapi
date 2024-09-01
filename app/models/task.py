@@ -4,7 +4,6 @@ import uuid
 import enum
 from .base import BaseModel
 
-
 class StatusEnum(enum.Enum):
     TODO = 'TODO'
     IN_PROGRESS = 'IN_PROGRESS'
