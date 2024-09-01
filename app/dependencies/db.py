@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
 
-from app.core.config import get_database_url
+from app.dependencies.config import get_database_url
 
 DATABASE_URL = get_database_url(async_mode=False)
 DATABASE_URL_ASYNC = get_database_url(async_mode=True)

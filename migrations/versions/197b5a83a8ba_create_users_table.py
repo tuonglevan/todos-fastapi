@@ -11,7 +11,7 @@ from uuid import uuid4
 from alembic import op
 import sqlalchemy as sa
 
-from app.core.config import get_config
+from app.dependencies.config import get_config
 from app.models.user import get_password_hash
 from app.utils.time_utils import get_current_utc_datetime
 
