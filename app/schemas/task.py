@@ -7,7 +7,6 @@ from pydantic import BaseModel
 from app.models.task import StatusEnum, PriorityEnum
 from app.schemas.user import UserInfo
 
-
 class TaskCreate(BaseModel):
     user_id: UUID
     summary: str
@@ -16,6 +15,7 @@ class TaskCreate(BaseModel):
     priority: PriorityEnum = PriorityEnum.LOW
 
 class TaskUpdate(BaseModel):
+    user_id: Optional[UUID] = None
     summary: Optional[str] = None
     description: Optional[str] = None
     status: Optional[StatusEnum] = None

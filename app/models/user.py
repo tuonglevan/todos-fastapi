@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Boolean, ForeignKey, UUID
 from sqlalchemy.orm import relationship
 import uuid
+
 from .base import BaseModel
 from passlib.context import CryptContext
 

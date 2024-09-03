@@ -14,6 +14,11 @@ class CompanyUpdate(BaseModel):
     description: Optional[str] = None
     mode: Optional[bool] = None
 
+class CompanyInfo(BaseModel):
+    company_id: UUID
+    name: str
+    status: str
+
 class CompanyResponseDetail(BaseModel):
     id: UUID
     name: str

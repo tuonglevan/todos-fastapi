@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from typing import Optional
 from uuid import UUID
 
+from app.schemas.company import CompanyInfo
+
+
 class UserBase(BaseModel):
     company_id: Optional[UUID] = None
     email: Optional[str] = None
@@ -26,7 +29,7 @@ class UserInfo(BaseModel):
     last_name: str
 
 class UserCreate(BaseModel):
-    company_id: str
+    company_id: UUID
     email: str
     username: str
     password: str
@@ -40,7 +43,7 @@ class UserUpdate(UserBase):
 
 class UserResponseDetail(BaseModel):
     id: UUID
-    company_name: Optional[str] = None
+    company_info: CompanyInfo
     email: str
     username: str
     first_name: str

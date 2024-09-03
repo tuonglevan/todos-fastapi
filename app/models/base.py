@@ -10,7 +10,3 @@ class BaseModel(Base):
 
     created_at = Column(DateTime(timezone=True), nullable=False, default=get_current_utc_datetime())
     updated_at = Column(DateTime(timezone=True), nullable=False, default=get_current_utc_datetime(), onupdate=get_current_utc_datetime())
-
-    def save(self, session):
-        session.add(self)
-        session.commit()

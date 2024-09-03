@@ -4,19 +4,24 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from starlette import status as StatusCode
 
-from app.dependencies.services import get_task_service
+from app.dependencies.auth import is_admin
+from app.dependencies.services import get_task_service, get_user_service
 from app.exceptions.task_exceptions import TaskNotFoundException
+from app.exceptions.user_exceptions import UserNotFoundException
 from app.models.task import StatusEnum, PriorityEnum
-from app.schemas.paginate import PaginatedResponse
 from app.schemas.task import TaskResponseDetail, TaskCreate, TaskUpdate
 from app.services.task_service import TaskService
-from app.transformers.task_transformers import transform_to_task_response
+from app.services.user_service import UserService
+from app.transformers.task_transformers import transform_to_task_response, TasksPaginatedResponse, generate_tasks_paginated_response
 
-router = APIRouter(prefix="/tasks", tags=["Tasks"])
-# Define a PaginatedResponse for tasks
-PaginatedTasksResponse = PaginatedResponse[TaskResponseDetail]
+router = APIRouter(prefix="/tasks", tags=["Tasks"], dependencies=[Depends(is_admin)])
 
-@router.get("", status_code=StatusCode.HTTP_200_OK, response_model=PaginatedTasksResponse)
+async def check_user_exists(user_id: UUID, user_service: UserService):
+    company = await user_service.get_user_by_id(user_id)
+    if not company:
+        raise UserNotFoundException(detail=f"User with ID {user_id} not found")
+
+@router.get("", status_code=StatusCode.HTTP_200_OK, response_model=TasksPaginatedResponse)
 async def get_tasks(
         status: Optional[StatusEnum] = Query(None),
         priority: Optional[PriorityEnum] = Query(None),
@@ -25,12 +30,7 @@ async def get_tasks(
         task_service: TaskService = Depends(get_task_service)
 ):
     tasks, total = await task_service.get_tasks(status=status, priority=priority, skip=skip, limit=limit)
-    return PaginatedTasksResponse(
-        total=total,
-        page=(skip // limit) + 1,
-        size=limit,
-        items=[transform_to_task_response(task) for task in tasks]
-    )
+    return generate_tasks_paginated_response(tasks, total, skip, limit)
 
 @router.get("/{task_id}", status_code=StatusCode.HTTP_200_OK, response_model=TaskResponseDetail)
 async def get_user(task_id: UUID, task_service: TaskService = Depends(get_task_service)):
@@ -45,12 +45,16 @@ async def get_tasks_by_user_id(user_id: UUID, task_service: TaskService = Depend
     return [transform_to_task_response(task) for task in tasks]
 
 @router.post("", status_code=StatusCode.HTTP_201_CREATED, response_model=TaskResponseDetail)
-def create_task(task_create: TaskCreate, task_service: TaskService = Depends(get_task_service)):
+async def create_task(task_create: TaskCreate, task_service: TaskService = Depends(get_task_service), user_service: UserService = Depends(get_user_service)):
+    if task_create.user_id is not None:
+        await check_user_exists(task_create.user_id, user_service)
     task = task_service.create_task(task_create=task_create)
     return transform_to_task_response(task)
 
 @router.put("/{task_id}", status_code=StatusCode.HTTP_200_OK, response_model=TaskResponseDetail)
-async def update_task(task_id: UUID, task_update: TaskUpdate, task_service: TaskService = Depends(get_task_service)):
+async def update_task(task_id: UUID, task_update: TaskUpdate, task_service: TaskService = Depends(get_task_service), user_service: UserService = Depends(get_user_service)):
+    if task_update.user_id is not None:
+        await check_user_exists(task_update.user_id, user_service)
     task = await task_service.update_task(task_id=task_id, task_update=task_update)
     if not task:
         raise TaskNotFoundException

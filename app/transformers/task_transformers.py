@@ -1,6 +1,12 @@
+from typing import Sequence
+
 from app.models import Task
+from app.schemas.paginate import PaginatedResponse
 from app.schemas.task import TaskResponseDetail
 from app.schemas.user import UserInfo
+
+# Define a type alias for PaginatedResponse of TaskResponseDetail
+TasksPaginatedResponse = PaginatedResponse[TaskResponseDetail]
 
 def transform_to_task_response(task: Task) -> TaskResponseDetail:
     return TaskResponseDetail(
@@ -15,4 +21,12 @@ def transform_to_task_response(task: Task) -> TaskResponseDetail:
         status=task.status,
         priority=task.priority,
         created_at=task.created_at
+    )
+
+def generate_tasks_paginated_response(tasks: Sequence[Task], total: int, skip: int, limit: int) -> TasksPaginatedResponse:
+    return TasksPaginatedResponse(
+        total=total,
+        page=(skip // limit) + 1,
+        size=limit,
+        items=[transform_to_task_response(task) for task in tasks]
     )
