@@ -1,4 +1,4 @@
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Optional
 from uuid import UUID
 
 from sqlalchemy import select, cast, Boolean, desc, func
@@ -15,9 +15,18 @@ class TaskService(BaseCRUDService):
         super().__init__(async_session)
         self.sync_session = sync_session
 
-    async def get_tasks(self, status: StatusEnum = None, priority: PriorityEnum = None, skip: int = 0, limit: int = 10) -> Tuple[Sequence[Task], int]:
+    async def get_tasks(
+            self,
+            user_id: Optional[str] = None,
+            status: StatusEnum = None,
+            priority: PriorityEnum = None,
+            skip: int = 0,
+            limit: int = 10
+    ) -> Tuple[Sequence[Task], int]:
         # Count Query
         count_query = select(func.count(Task.id))
+        if user_id is not None:
+            count_query = count_query.filter(cast(Task.user_id == user_id, Boolean))
         if status is not None:
             count_query = count_query.where(cast(Task.status == status, Boolean))
         if priority is not None:
@@ -28,6 +37,8 @@ class TaskService(BaseCRUDService):
 
         # Data Query
         data_query = select(Task).options(joinedload(Task.user, innerjoin=True))
+        if user_id is not None:
+            data_query = data_query.filter(cast(Task.user_id == user_id, Boolean))
         if status is not None:
             data_query = data_query.where(cast(Task.status == status, Boolean))
         if priority is not None:
@@ -45,6 +56,14 @@ class TaskService(BaseCRUDService):
             select(Task)
             .options(joinedload(Task.user, innerjoin=True))
             .filter(cast(Task.id == task_id, Boolean))
+        )
+        return result.scalar_one_or_none()
+
+    async def get_task_by_id_and_user_id(self, task_id: UUID, user_id: UUID) -> Task:
+        result = await self.async_session.execute(
+            select(Task)
+            .options(joinedload(Task.user, innerjoin=True))
+            .filter(cast(Task.id == task_id, Boolean), cast(Task.user_id == user_id, Boolean))
         )
         return result.scalar_one_or_none()
 
