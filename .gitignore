@@ -2,6 +2,7 @@
 .venv
 # Ignore all .env files
 .env
+.env.*
 
 # Allow .env.example files
 !.env.example

@@ -56,7 +56,7 @@ This will:
 
 ### 4. Access the application
 
-Once the containers are up and running, you can access the FastAPI application at:
+Once the containers are up and running, you can access the FastAPI application at: http://localhost:8000/docs
 
 ### 5. Stopping the application
 
