@@ -1,5 +1,7 @@
 .idea
 .venv
+# pycache
+__pycache__/
 # Ignore all .env files
 .env
 .env.*

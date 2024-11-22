@@ -12,8 +12,7 @@ from .base_crud_service import BaseCRUDService
 
 class TaskService(BaseCRUDService):
     def __init__(self, async_session: AsyncSession = None, sync_session: Session = None):
-        super().__init__(async_session)
-        self.sync_session = sync_session
+        super().__init__(async_session, sync_session)
 
     async def get_tasks(
             self,

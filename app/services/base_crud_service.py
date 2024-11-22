@@ -2,12 +2,14 @@ from uuid import UUID
 from typing import Type, TypeVar
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, cast, Boolean
+from sqlalchemy.orm import Session
 
 ModelType = TypeVar("ModelType")
 
 class BaseCRUDService:
-    def __init__(self, async_session: AsyncSession = None):
+    def __init__(self, async_session: AsyncSession = None, sync_session: Session = None):
         self.async_session = async_session
+        self.sync_session = sync_session
 
     async def get_by_id(self, model: Type[ModelType], model_id: UUID) -> ModelType:
         result = await self.async_session.execute(select(model).where(cast(model.id == model_id, Boolean)))
@@ -15,17 +17,16 @@ class BaseCRUDService:
         return entity
 
     async def update_by_id(self, model: Type[ModelType], model_id: UUID, update_data: dict) -> ModelType | None:
-        async with self.async_session.begin():
-            result = await self.async_session.execute(select(model).where(model.id == model_id))
-            entity = result.scalar_one_or_none()
-            if not entity:
-                return None
-            for attr, value in update_data.items():
-                setattr(entity, attr, value)
-            self.async_session.add(entity)
-            await self.async_session.commit()
-            await self.async_session.refresh(entity)
-            return entity
+        entity = self.sync_session.scalar(select(model).where(cast(model.id == model_id, Boolean)))
+        if not entity:
+            return None
+        for attr, value in update_data.items():
+            setattr(entity, attr, value)
+        self.sync_session.add(entity)
+        self.sync_session.commit()
+        self.sync_session.refresh(entity)
+
+        return entity
 
     async def delete_by_id(self, model: Type[ModelType], model_id: UUID) -> bool:
         async with self.async_session.begin():
