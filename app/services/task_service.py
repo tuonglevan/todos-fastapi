@@ -5,7 +5,7 @@ from sqlalchemy import select, cast, Boolean, desc, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session, joinedload
 
-from app.models import Task
+from app.models import Task, User
 from app.models.task import StatusEnum, PriorityEnum
 from app.schemas.task import TaskCreate, TaskUpdate
 from .base_crud_service import BaseCRUDService
@@ -71,6 +71,22 @@ class TaskService(BaseCRUDService):
             select(Task)
             .options(joinedload(Task.user, innerjoin=True))
             .filter(cast(Task.user_id == user_id, Boolean))
+        )
+        return result.scalars().all()
+
+    async def get_tasks_by_user_id_and_status(self, user_id: UUID, status: StatusEnum) -> Sequence[Task]:
+        result = await self.async_session.execute(
+            select(Task)
+            .options(joinedload(Task.user, innerjoin=True))
+            .filter(cast(Task.user_id == user_id, Boolean), cast(Task.status == status, Boolean))
+        )
+        return result.scalars().all()
+
+    async def get_tasks_by_company_id_and_status(self, company_id: UUID, status: StatusEnum) -> Sequence[Task]:
+        result = await self.async_session.execute(
+            select(Task)
+            .options(joinedload(Task.user, innerjoin=True))
+            .where(User.company_id == company_id, Task.status == status)
         )
         return result.scalars().all()
 

@@ -52,6 +52,16 @@ async def get_tasks_by_user_id(user_id: UUID, task_service: TaskService = Depend
     tasks = await task_service.get_tasks_by_user_id(user_id=user_id)
     return [transform_to_task_response(task) for task in tasks]
 
+@router.get("/user/{user_id}/completed", status_code=StatusCode.HTTP_200_OK, response_model=List[TaskResponseDetail], dependencies=[Depends(is_authenticated)])
+async def get_completed_tasks_by_user_id(user_id: UUID, task_service: TaskService = Depends(get_task_service)):
+    tasks = await task_service.get_tasks_by_user_id_and_status(user_id=user_id, status=StatusEnum.DONE)
+    return [transform_to_task_response(task) for task in tasks]
+
+@router.get("/company/{company_id}/completed", status_code=StatusCode.HTTP_200_OK, response_model=List[TaskResponseDetail], dependencies=[Depends(is_authenticated)])
+async def get_completed_tasks_by_company_id(company_id: UUID, task_service: TaskService = Depends(get_task_service)):
+    tasks = await task_service.get_tasks_by_company_id_and_status(company_id=company_id, status=StatusEnum.DONE)
+    return [transform_to_task_response(task) for task in tasks]
+
 @router.post("", status_code=StatusCode.HTTP_201_CREATED, response_model=TaskResponseDetail, dependencies=[Depends(is_admin)])
 async def create_task(task_create: TaskCreate, task_service: TaskService = Depends(get_task_service), user_service: UserService = Depends(get_user_service)):
     if task_create.user_id is not None:
@@ -68,7 +78,7 @@ async def update_task(task_id: UUID, task_update: TaskUpdate, task_service: Task
         raise TaskNotFoundException
     return transform_to_task_response(task)
 
-@router.delete("/{task_id}", status_code=StatusCode.HTTP_204_NO_CONTENT, dependencies=[Depends(is_admin)])
+@router.delete("/{task_id}", status_code=StatusCode.HTTP_200_OK, dependencies=[Depends(is_admin)])
 async def delete_task(task_id: UUID, task_service: TaskService = Depends(get_task_service)):
     success = await task_service.delete_task(task_id=task_id)
     if not success:
